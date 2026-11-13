@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bitDroid</title>
+<meta name="description" content="bitDroid: an Android 17 ROM built on LineageOS 24, with its own launcher, keyboard, apps and look.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* layout: a living Glow behind everything that shifts color as you scroll; a coverflow of real
+     screenshots right under the hero; a sticky phone that plays Enhancements while its switches flip */
+  --ink: #0B0A10;
+  --ink-2: #15121E;
+  --line: #2A2438;
+  --violet: #5B3FC8;
+  --teal: #0F5C63;
+  --plum: #5A2346;
+  --lilac: #EADDFF;
+  --on-lilac: #21005D;
+  --mute: #B4ADC2;
+  --mint: #9FE1CB;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --p: 0;
+  --tint: #5B3FC8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+body { margin: 0; overflow-x: clip; background: var(--ink); color: var(--lilac); font-family: var(--body); font-size: 17px; line-height: 1.6; overflow-x: hidden; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--lilac); outline-offset: 3px; border-radius: 8px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(34px, 5vw, 60px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.lede { color: var(--mute); max-width: 58ch; margin: 14px 0 0; }
+.mono { font-family: var(--mono); }
+.eyebrow { font-family: var(--mono); font-size: 13px; color: var(--mint); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.eyebrow::before { content: ""; width: 22px; height: 12px; border-radius: 6px; background: var(--mint); box-shadow: inset -12px 0 0 -2px var(--mint), inset 10px 0 0 0 #04342C; }
+
+/* the living Glow: fixed behind the page, it drifts and shifts color as you scroll */
+.sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: var(--ink); }
+.sky i { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .5; will-change: transform; transition: background 1.2s ease, opacity .6s ease; }
+.sky .a { width: 60vw; height: 60vw; left: -20vw; top: -25vw; background: var(--violet); transform: translate(calc(var(--p) * 30vw), calc(var(--p) * 60vh)); }
+.sky .b { width: 50vw; height: 50vw; right: -18vw; top: 10vh; background: var(--teal); transform: translate(calc(var(--p) * -20vw), calc(var(--p) * 40vh)); }
+.sky .c { width: 42vw; height: 42vw; left: 30vw; top: 55vh; background: var(--plum); transform: translate(calc(var(--p) * -25vw), calc(var(--p) * -50vh)) scale(calc(1 + var(--p) * .4)); }
+.sky::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(234,221,255,.07) 1px, transparent 1px); background-size: 26px 26px; mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent 70%); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent 70%); }
+.off .sky i { opacity: .12; }
+
+.topbar { position: fixed; top: 0; left: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(var(--p)); background: linear-gradient(90deg, var(--violet), var(--mint)); z-index: 30; }
+
+/* nav */
+nav { position: sticky; top: 0; z-index: 20; background: rgba(11,10,16,.6); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border-bottom: 1px solid rgba(42,36,56,.7); }
+nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 20px; text-decoration: none; }
+.mark { width: 34px; height: 20px; border-radius: 10px; background: var(--lilac); position: relative; flex: none; }
+.mark::after { content: ""; position: absolute; right: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--on-lilac); }
+.links { display: flex; gap: 22px; margin-left: auto; font-size: 15px; }
+.links a { text-decoration: none; color: var(--mute); transition: color .2s; }
+.links a:hover { color: var(--lilac); }
+.pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 12px 22px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid transparent; transition: transform .18s ease, background .2s, border-color .2s; cursor: pointer; font-family: var(--body); }
+.pill:hover { transform: translateY(-2px); }
+.pill:active { transform: scale(.97); }
+.pill.solid { background: var(--lilac); color: var(--on-lilac); }
+.pill.ghost { border-color: rgba(180,173,194,.35); color: var(--lilac); background: rgba(21,18,30,.4); backdrop-filter: blur(8px); }
+.pill.ghost:hover { border-color: var(--lilac); }
+
+/* hero */
+.hero { position: relative; padding: 90px 0 40px; }
+.hero .wrap { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center; }
+.hero h1 { font-size: clamp(54px, 9vw, 128px); font-weight: 800; line-height: .88; letter-spacing: -0.045em; }
+.hero h1 .line { display: block; transform: translateY(calc(var(--hp, 0) * -40px)); }
+.hero h1 .line + .line { transform: translateY(calc(var(--hp, 0) * -90px)); }
+.hero h1 em { font-style: normal; background: linear-gradient(100deg, var(--mint), var(--lilac) 60%, #CECBF6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.off .hero h1 em { background: none; color: #4A4458; -webkit-text-fill-color: #4A4458; }
+.hero .lede { font-size: 19px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.bigswitch { justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 14px; transform: rotate(calc(var(--hp, 0) * -8deg)) translateY(calc(var(--hp, 0) * 40px)); }
+.track { width: 300px; height: 150px; border-radius: 75px; background: var(--lilac); border: 0; padding: 0; position: relative; cursor: pointer; transition: background .45s ease, box-shadow .45s ease; box-shadow: 0 30px 80px -20px rgba(91,63,200,.8), 0 0 0 10px rgba(234,221,255,.06); }
+.knob { position: absolute; top: 13px; left: 163px; width: 124px; height: 124px; border-radius: 50%; background: var(--on-lilac); transition: left .5s cubic-bezier(.5,1.6,.4,1), background .45s ease; display: grid; place-items: center; color: var(--lilac); font-family: var(--display); font-weight: 800; font-size: 22px; }
+.off .track { background: #241F31; box-shadow: none; }
+.off .knob { left: 13px; background: var(--mute); color: var(--ink); }
+.switch-note { font-size: 13px; color: var(--mute); }
+
+/* moving word band */
+.band { overflow: hidden; padding: 30px 0; border-block: 1px solid rgba(42,36,56,.6); margin: 50px 0 0; }
+.band div { display: flex; gap: 48px; white-space: nowrap; transform: translateX(calc(var(--p) * -1400px)); font-family: var(--display); font-weight: 800; font-size: clamp(34px, 6vw, 72px); letter-spacing: -0.03em; line-height: 1; }
+.band span { color: transparent; -webkit-text-stroke: 1.5px rgba(234,221,255,.35); }
+.band span.on { color: var(--lilac); -webkit-text-stroke: 0; }
+
+/* coverflow */
+.flow-sec { position: relative; padding: 70px 0 40px; }
+.flow-sec::before { content: ""; position: absolute; left: 50%; top: 42%; width: 760px; height: 760px; max-width: 120vw; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--tint) 0%, transparent 62%); opacity: .55; transition: background .8s ease; z-index: -1; }
+.flow { position: relative; height: 640px; perspective: 1600px; outline: none; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.flow .card { position: absolute; left: 50%; top: 10px; width: 270px; margin-left: -135px; transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .7s ease, filter .7s ease; cursor: pointer; }
+.frame { border-radius: 34px; border: 7px solid #1C1828; background: #1C1828; overflow: hidden; aspect-ratio: 1080 / 2424; box-shadow: 0 40px 90px -30px rgba(0,0,0,.9); }
+.frame img, .frame video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.flow .card.center .frame { border-color: #2A2438; box-shadow: 0 50px 120px -30px var(--tint), 0 0 0 1px rgba(234,221,255,.15); }
+.flow-ui { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 8px; }
+.round { width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(180,173,194,.35); background: rgba(21,18,30,.5); color: var(--lilac); display: grid; place-items: center; cursor: pointer; transition: transform .18s, background .2s, color .2s; backdrop-filter: blur(8px); }
+.round:hover { background: var(--lilac); color: var(--on-lilac); transform: scale(1.06); }
+.round svg { width: 20px; height: 20px; }
+.dots { display: flex; gap: 8px; }
+.dots button { width: 10px; height: 10px; border-radius: 5px; border: 0; padding: 0; background: rgba(234,221,255,.25); cursor: pointer; transition: width .35s ease, background .35s; }
+.dots button[aria-current="true"] { width: 30px; background: var(--lilac); }
+.caption { text-align: center; min-height: 104px; margin-top: 26px; }
+.caption h3 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 800; letter-spacing: -0.02em; transition: opacity .35s, transform .35s; }
+.caption p { color: var(--mute); max-width: 52ch; margin: 8px auto 0; transition: opacity .35s .05s, transform .35s .05s; }
+.caption.swap h3, .caption.swap p { opacity: 0; transform: translateY(10px); }
+.count { font-family: var(--mono); font-size: 13px; color: var(--mute); min-width: 64px; text-align: center; }
+
+/* enhancements: sticky phone, switches flip as you scroll */
+.enh { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; padding: 80px 24px; }
+.enh-phone { position: sticky; top: 110px; align-self: start; display: grid; justify-items: center; }
+.enh-phone .frame { width: 290px; transform: rotate(calc(-4deg + var(--ep, 0) * 8deg)); }
+.enh-item { min-height: 46vh; display: flex; flex-direction: column; justify-content: center; opacity: .35; transition: opacity .5s ease; }
+.enh-item.active { opacity: 1; }
+.enh-item h3 { font-size: clamp(24px, 2.6vw, 32px); font-weight: 800; display: flex; align-items: center; gap: 14px; }
+.enh-item p { color: var(--mute); margin: 10px 0 0; max-width: 44ch; }
+.sw { flex: none; width: 46px; height: 26px; border-radius: 13px; background: #2A2438; position: relative; transition: background .4s ease; }
+.sw::after { content: ""; position: absolute; left: 4px; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--mute); transition: left .4s cubic-bezier(.5,1.6,.4,1), background .4s; }
+.enh-item.active .sw { background: var(--lilac); }
+.enh-item.active .sw::after { left: 24px; background: var(--on-lilac); }
+
+section { position: relative; padding: 100px 0; }
+.head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+
+/* devices */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { background: rgba(21,18,30,.5); color: var(--mute); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font: 500 14px var(--body); cursor: pointer; transition: all .2s; }
+.chip[aria-pressed="true"] { background: var(--lilac); color: var(--on-lilac); border-color: var(--lilac); }
+.devices { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.device { position: relative; background: rgba(21,18,30,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 14px; min-height: 300px; transition: transform .25s ease, border-color .25s; transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.device:hover { border-color: rgba(234,221,255,.35); }
+.phone { height: 92px; display: flex; align-items: end; gap: 6px; }
+.phone b { display: block; width: 46px; border-radius: 12px; border: 2px solid var(--line); background: linear-gradient(160deg, var(--violet), var(--teal)); }
+.device h3 { font-size: 23px; font-weight: 600; }
+.code { font-family: var(--mono); font-size: 13px; color: var(--mute); }
+.status { align-self: start; font-size: 12px; font-weight: 600; letter-spacing: .05em; border-radius: 999px; padding: 4px 10px; }
+.status.official { background: var(--mint); color: #04342C; }
+.status.progress { background: #3A2F12; color: #FAC775; }
+.status.wanted { background: #2A2438; color: var(--mute); }
+.meta { font-size: 14px; color: var(--mute); display: grid; gap: 2px; }
+.meta strong { color: var(--lilac); font-weight: 500; }
+.device .pill { margin-top: auto; align-self: start; padding: 9px 16px; font-size: 14px; }
+.device.join { border-style: dashed; background: transparent; backdrop-filter: none; }
+
+/* features bento with a light that follows the pointer */
+.bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.tile { grid-column: span 2; position: relative; overflow: hidden; background: rgba(21,18,30,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 26px; padding: 26px; min-height: 190px; }
+.tile.wide { grid-column: span 3; }
+.tile.big { grid-column: span 4; }
+.tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(159,225,203,.16), transparent 60%); opacity: 0; transition: opacity .3s; }
+.tile:hover::before { opacity: 1; }
+.tile h3 { font-size: 22px; font-weight: 600; margin: 14px 0 6px; position: relative; }
+.tile p { margin: 0; color: var(--mute); font-size: 15px; position: relative; max-width: 46ch; }
+.tile .sw { display: inline-block; }
+.tile:hover .sw { background: var(--lilac); }
+.tile:hover .sw::after { left: 24px; background: var(--on-lilac); }
+
+/* install */
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; counter-reset: s; }
+.steps li { counter-increment: s; padding: 22px; border-radius: 22px; background: rgba(21,18,30,.6); border: 1px solid var(--line); }
+.steps li::before { content: "0" counter(s); font-family: var(--display); font-weight: 800; font-size: 44px; line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--mint); }
+.steps h3 { font-size: 20px; font-weight: 600; margin: 12px 0 6px; }
+.steps p { margin: 0; color: var(--mute); font-size: 15px; }
+.warn { margin-top: 26px; border: 1px solid #5A2346; background: rgba(30,16,25,.8); color: #F4C0D1; border-radius: 16px; padding: 14px 18px; font-size: 15px; max-width: 78ch; }
+
+/* source */
+.split > div, .enh > div, .hero .wrap > div { min-width: 0; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+pre { margin: 0; background: rgba(21,18,30,.85); border: 1px solid var(--line); border-radius: 20px; padding: 22px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.75; color: var(--lilac); }
+pre .c { color: var(--mute); }
+.copy { margin-top: 12px; }
+
+/* community */
+.community { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.tg { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; text-decoration: none; background: rgba(21,18,30,.72); border: 1px solid var(--line); border-radius: 26px; padding: 26px; transition: transform .25s, border-color .25s; }
+.tg:hover { transform: translateY(-6px); border-color: var(--mint); }
+.tg h3 { font-size: 24px; font-weight: 600; }
+.tg span { color: var(--mute); font-size: 15px; }
+.tg .mono { color: var(--mint); font-size: 14px; }
+
+.outro { text-align: center; padding: 120px 0 80px; }
+.outro h2 { font-size: clamp(44px, 8vw, 110px); letter-spacing: -0.045em; }
+.outro .cta { justify-content: center; }
+footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--mute); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+
+/* scroll reveal (only for things below the first screen; see the script) */
+.pre { opacity: 0; transform: translateY(46px) scale(.98); }
+.rv { transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1), border-color .25s; }
+
+@media (max-width: 860px) {
+  .hero .wrap, .split, .enh { grid-template-columns: minmax(0, 1fr); }
+  pre { font-size: 12px; }
+  .links { display: none; }
+  nav .pill { margin-left: auto; }
+  .track { width: 220px; height: 110px; border-radius: 55px; }
+  .knob { width: 90px; height: 90px; top: 10px; left: 120px; font-size: 17px; }
+  .off .knob { left: 10px; }
+  .flow { height: 520px; }
+  .flow .card { width: 210px; margin-left: -105px; }
+  .enh-phone { position: relative; top: 0; }
+  .enh-phone .frame { width: 240px; }
+  .enh-item { min-height: 0; padding: 22px 0; opacity: 1; }
+  .bento { grid-template-columns: 1fr; }
+  .tile, .tile.wide, .tile.big { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+  .band div, .hero h1 .line, .bigswitch, .sky i { transform: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+<div class="topbar" aria-hidden="true"></div>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span>bitDroid</a>
+    <div class="links">
+      <a href="#screens">Screens</a>
+      <a href="#enhancements">Enhancements</a>
+      <a href="#devices">Devices</a>
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#community">Community</a>
+    </div>
+    <a class="pill solid" href="https://github.com/bitDroidOS/OTA/releases">Download</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <h1><span class="line">Flip your</span><span class="line">Pixel <em>on.</em></span></h1>
+      <p class="lede">bitDroid is an Android 17 ROM built on LineageOS 24, with its own launcher, keyboard, texting and phone apps, recovery, and a look that's all its own.</p>
+      <div class="cta">
+        <a class="pill solid" href="#devices">Find your device</a>
+        <a class="pill ghost" href="#screens">See it in action</a>
+      </div>
+    </div>
+    <div class="bigswitch">
+      <button class="track" id="flip" aria-pressed="true" aria-label="Flip the bitDroid switch">
+        <span class="knob" id="knob">ON</span>
+      </button>
+      <span class="switch-note">Go on, flip it.</span>
+    </div>
+  </div>
+  <div class="band" aria-hidden="true"><div>
+    <span>Android 17</span><span class="on">bitHome</span><span>LineageOS 24</span><span class="on">Bloom</span><span>OTA updates</span><span class="on">bitKeys</span><span>Glance bar</span><span class="on">Big Switch</span><span>Google apps</span><span class="on">bitDroid</span><span>Android 17</span><span class="on">bitHome</span><span>LineageOS 24</span><span class="on">Bloom</span>
+  </div></div>
+</header>
+
+<section class="flow-sec" id="screens" aria-roledescription="carousel" aria-label="Screenshots">
+  <div class="flow" id="flow" tabindex="0" aria-label="Screenshots. Use the arrow keys to move."></div>
+  <div class="flow-ui">
+    <button class="round" id="prev" aria-label="Previous screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="dots" id="dots"></div>
+    <span class="count" id="count">1 / 9</span>
+    <button class="round" id="next" aria-label="Next screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <div class="caption wrap" id="caption" aria-live="polite"><h3 id="capTitle">bitHome in Bloom</h3><p id="capText">Big tiles for the time, your music, your next alarm and battery. The search bar above the dock cycles through ideas of what to look up.</p></div>
+</section>
+
+<div class="wrap enh" id="enhancements">
+  <div class="enh-phone">
+    <div class="frame"><video src="shots/enhancements.mp4" poster="shots/enhancements-poster.jpg" autoplay muted loop playsinline aria-label="Scrolling through bitDroid Enhancements in Settings"></video></div>
+  </div>
+  <div>
+    <div class="eyebrow">SETTINGS › BITDROID ENHANCEMENTS</div>
+    <h2>Every extra, one switch away.</h2>
+    <p class="lede">All of bitDroid's extras live on one page in Settings. Flip what you like, leave what you don't.</p>
+    <div class="enh-list">
+      <div class="enh-item"><h3><span class="sw"></span>Charging wave</h3><p>Plug in and a liquid wave rises up the screen to your battery level.</p></div>
+      <div class="enh-item"><h3><span class="sw"></span>Hub Quick Settings</h3><p>Big pill toggles, round tiles, a music card and tall brightness and volume sliders. Or go Classic, with big tiles filled with your accent color.</p></div>
+      <div class="enh-item"><h3><span class="sw"></span>Status bar icons</h3><p>Pick your signal, Wi-Fi and battery styles.</p></div>
+      <div class="enh-item"><h3><span class="sw"></span>Dynamic bar</h3><p>A live pill on the status bar for music, calls, timers, navigation, recording and more, each with its own switch.</p></div>
+      <div class="enh-item"><h3><span class="sw"></span>AxionOS volume panel</h3><p>A ringer switch and expandable sliders, or swap to other slider styles and a panel across the top.</p></div>
+    </div>
+  </div>
+</div>
+
+<main>
+<section id="devices">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="eyebrow">DEVICES</div>
+        <h2>Supported devices</h2>
+        <p class="lede">Official builds get updates through the built-in Updater. Devices in progress are being brought up by their maintainers.</p>
+      </div>
+      <div class="chips" role="group" aria-label="Filter devices">
+        <button class="chip" id="f-all" data-f="all" aria-pressed="true">All</button>
+        <button class="chip" id="f-official" data-f="official" aria-pressed="false">Official</button>
+        <button class="chip" id="f-progress" data-f="progress" aria-pressed="false">In progress</button>
+      </div>
+    </div>
+    <div class="devices" id="deviceGrid"></div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="eyebrow">WHAT'S INSIDE</div>
+        <h2>Built in, not bolted on</h2>
+        <p class="lede">Everything here ships in every build. Nothing to install after.</p>
+      </div>
+    </div>
+    <div class="bento">
+      <div class="tile big"><span class="sw"></span><h3>bitHome</h3><p>Our own launcher. Pick Bloom, Morph or Orbit during setup, hold the search bar to remove it, and swipe up for the Bento App Library.</p></div>
+      <div class="tile"><span class="sw"></span><h3>Glance bar</h3><p>Your music as a pill in the status bar, with a mini player one tap away.</p></div>
+      <div class="tile"><span class="sw"></span><h3>Our own apps</h3><p>bitKeys, bitMessages, bitDialer and AlexLMP.</p></div>
+      <div class="tile big"><span class="sw"></span><h3>Big Switch recovery</h3><p>A recovery that shows real install progress, names what you're flashing, and asks before it erases anything with a big red switch.</p></div>
+      <div class="tile wide"><span class="sw"></span><h3>Bloom notifications</h3><p>Tinted, rounded cards that follow your Material You colors.</p></div>
+      <div class="tile wide"><span class="sw"></span><h3>Updates built in</h3><p>New builds arrive in Settings, System, Updater. No wipe, no reflashing Google apps.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="eyebrow">INSTALL</div>
+        <h2>Install in four steps</h2>
+        <p class="lede">The full guide (INSTALL.md) comes with every release. Here's the short version.</p>
+      </div>
+      <a class="pill ghost" href="https://github.com/bitDroidOS/OTA/releases">Open releases</a>
+    </div>
+    <ol class="steps">
+      <li><h3>Unlock and update</h3><p>Unlock the bootloader and update to the latest stock Android first.</p></li>
+      <li><h3>Flash the images</h3><p>In fastboot, flash boot, dtbo, vendor_kernel_boot and vendor_boot from the release.</p></li>
+      <li><h3>Format and sideload</h3><p>In recovery, format data, then Apply from ADB and sideload the bitDroid zip.</p></li>
+      <li><h3>Add Google apps</h3><p>Reboot to recovery when asked, sideload the GApps zip from the release, then reboot.</p></li>
+    </ol>
+    <p class="warn">A clean install wipes your phone, so back up first. Never relock the bootloader while running a custom ROM.</p>
+  </div>
+</section>
+
+<section id="source">
+  <div class="wrap split">
+    <div>
+      <div class="eyebrow">OPEN SOURCE</div>
+      <h2>Build it yourself</h2>
+      <p class="lede">The manifest swaps the LineageOS repos we change for ours, so you can build bitDroid for your own device on top of LineageOS 24.</p>
+      <div class="cta">
+        <a class="pill solid" href="https://github.com/bitDroidOS/local_manifests">Source on GitHub</a>
+        <a class="pill ghost" href="https://github.com/bitDroidOS">bitDroidOS org</a>
+      </div>
+    </div>
+    <div>
+<pre id="buildCmds"><span class="c"># LineageOS 24 + bitDroid</span>
+repo init -u https://github.com/LineageOS/android.git \
+  -b lineage-24.0 --git-lfs
+git clone https://github.com/bitDroidOS/local_manifests \
+  .repo/local_manifests
+repo sync -c -j8
+source build/envsetup.sh
+breakfast <span class="c">&lt;device&gt;</span> &amp;&amp; m bacon</pre>
+      <button class="pill ghost copy" id="copyBtn" type="button">Copy commands</button>
+    </div>
+  </div>
+</section>
+
+<section id="community">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="eyebrow">COMMUNITY</div>
+        <h2>Come hang out</h2>
+        <p class="lede">Questions, bug reports, screenshots and new builds all land on Telegram first.</p>
+      </div>
+    </div>
+    <div class="community">
+      <a class="tg" href="https://t.me/bitDroidCommunity"><h3>Community</h3><span>Chat, help and feedback from other bitDroid users.</span><span class="mono">t.me/bitDroidCommunity</span></a>
+      <a class="tg" href="https://t.me/bitDroidNews"><h3>Announcements</h3><span>New builds, changelogs and news. Quiet otherwise.</span><span class="mono">t.me/bitDroidNews</span></a>
+      <a class="tg" href="https://github.com/bitDroidOS"><h3>GitHub</h3><span>Releases, source and the update server.</span><span class="mono">github.com/bitDroidOS</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="outro">
+  <div class="wrap">
+    <h2>Ready to flip it?</h2>
+    <div class="cta">
+      <a class="pill solid" href="https://github.com/bitDroidOS/OTA/releases">Download bitDroid</a>
+      <a class="pill ghost" href="https://t.me/bitDroidNews">Get announcements</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Made by Alex Desrosier.</span>
+    <span>Built on LineageOS. Not affiliated with Google.</span>
+  </div>
+</footer>
+
+<script>
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- screenshots coverflow ---------- */
+const SHOTS = [
+  ["home-bloom", "bitHome in Bloom", "Big tiles for the time, your music, your next alarm and battery. The search bar above the dock cycles through ideas of what to look up.", "#5B3FC8", "video"],
+  ["app-library", "Bento App Library", "Swipe up and your apps are sorted into categories. Tap an app to open it, or the + to see the rest.", "#7A3F8F"],
+  ["glance-player", "Glance bar player", "Tap the music pill in the status bar and a mini player drops down, with seek and skip.", "#4E3BA8"],
+  ["lock-screen", "Lock screen", "Clock up top, flashlight and camera in the corners, and your music in a pill between them.", "#2E3A7A"],
+  ["lock-player", "Lock screen player", "Open the pill for album art, a seek bar and full controls without unlocking.", "#8F2F3E"],
+  ["quick-settings", "Hub Quick Settings", "Big pill toggles, round tiles, a music card and tall brightness and volume sliders.", "#6B4FD0"],
+  ["settings", "Settings", "A bitDroid card with your build and device, and colorful icons for every section.", "#0F5C63"],
+  ["bitmessages", "bitMessages", "Our texting app, with bold type and a clean, dark layout.", "#3D4FB0"],
+  ["bitdialer", "bitDialer", "Our phone app. Incoming calls get big Decline and slide-up-to-answer buttons.", "#5A2346"]
+];
+const flow = document.getElementById("flow"), dots = document.getElementById("dots");
+const flowSec = document.getElementById("screens");
+let cur = 0;
+const N = SHOTS.length;
+const cards = SHOTS.map((s, i) => {
+  const c = document.createElement("div");
+  c.className = "card";
+  c.innerHTML = s[4] === "video"
+    ? '<div class="frame"><video src="shots/' + s[0] + '.mp4" poster="shots/' + s[0] + '-poster.jpg" autoplay muted loop playsinline aria-label="' + s[1] + '"></video></div>'
+    : '<div class="frame"><img src="shots/' + s[0] + '.jpg" alt="' + s[1] + ': ' + s[2] + '" width="540" height="1212"></div>';
+  c.addEventListener("click", () => { if (i !== cur) go(i, true); });
+  flow.appendChild(c);
+  const d = document.createElement("button");
+  d.setAttribute("aria-label", "Show " + s[1]);
+  d.addEventListener("click", () => go(i, true));
+  dots.appendChild(d);
+  return c;
+});
+function layout() {
+  const narrow = innerWidth < 860;
+  cards.forEach((c, i) => {
+    let d = i - cur;
+    if (d > N / 2) d -= N;
+    if (d < -N / 2) d += N;
+    const a = Math.abs(d);
+    c.style.transform = "translateX(" + d * (narrow ? 58 : 72) + "%) translateZ(" + (-a * 180) + "px) rotateY(" + (-d * 34) + "deg) scale(" + (1 - a * 0.06) + ")";
+    c.style.opacity = a > 3 ? 0 : 1 - a * 0.22;
+    c.style.filter = a === 0 ? "none" : "brightness(" + (0.75 - a * 0.1) + ") saturate(.9)";
+    c.style.zIndex = 20 - a;
+    c.style.pointerEvents = a > 3 ? "none" : "auto";
+    c.classList.toggle("center", a === 0);
+    c.setAttribute("aria-hidden", a === 0 ? "false" : "true");
+  });
+  [...dots.children].forEach((d, i) => d.setAttribute("aria-current", String(i === cur)));
+  document.getElementById("count").textContent = (cur + 1) + " / " + N;
+  flowSec.style.setProperty("--tint", SHOTS[cur][3]);
+}
+const cap = document.getElementById("caption");
+function go(i, user) {
+  cur = (i + N) % N;
+  layout();
+  cap.classList.add("swap");
+  setTimeout(() => {
+    document.getElementById("capTitle").textContent = SHOTS[cur][1];
+    document.getElementById("capText").textContent = SHOTS[cur][2];
+    cap.classList.remove("swap");
+  }, reduce ? 0 : 220);
+  if (user) restart();
+}
+document.getElementById("prev").addEventListener("click", () => go(cur - 1, true));
+document.getElementById("next").addEventListener("click", () => go(cur + 1, true));
+flow.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1, true); }
+  if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1, true); }
+});
+let sx = null, moved = false;
+flow.addEventListener("pointerdown", e => { sx = e.clientX; moved = false; });
+flow.addEventListener("pointermove", e => { if (sx !== null && Math.abs(e.clientX - sx) > 8) moved = true; });
+addEventListener("pointerup", e => {
+  if (sx === null) return;
+  const dx = e.clientX - sx; sx = null;
+  if (Math.abs(dx) > 45) go(cur + (dx < 0 ? 1 : -1), true);
+});
+flow.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); } }, true);
+let timer = null, paused = false;
+function restart() { clearInterval(timer); if (!reduce) timer = setInterval(() => { if (!paused && !document.hidden) go(cur + 1, false); }, 4200); }
+flow.addEventListener("mouseenter", () => paused = true);
+flow.addEventListener("mouseleave", () => paused = false);
+/* stays on the home screen video until someone moves it once; after that it plays on its own */
+layout();
+addEventListener("resize", layout);
+
+/* ---------- devices ---------- */
+/* Edit this list to add or change devices. status: "official", "progress" or "wanted".
+   shape: "fold" draws two halves, "small" a shorter phone. */
+const DEVICES = [
+  { name: "Pixel 10", code: "frankel", status: "official", maintainer: "Alex Desrosier", link: "https://github.com/bitDroidOS/OTA/releases", action: "Download" },
+  { name: "Pixel 10 Pro", code: "blazer", status: "official", maintainer: "@jpb896", link: "https://github.com/bitDroidOS/OTA/releases", action: "Download" },
+  { name: "Pixel 10 Pro XL", code: "mustang", status: "official", maintainer: "@jpb896", link: "https://github.com/bitDroidOS/OTA/releases", action: "Download" },
+  { name: "Pixel 10 Pro Fold", code: "rango", status: "progress", maintainer: "@Dragynbane222", link: "https://t.me/bitDroidNews", action: "Follow for news", shape: "fold" },
+  { name: "Pixel 6a", code: "bluejay", status: "official", maintainer: "@jpb896", link: "https://github.com/bitDroidOS/OTA/releases", action: "Download", shape: "small" }
+];
+const LABEL = { official: "OFFICIAL", progress: "IN PROGRESS", wanted: "MAINTAINER WANTED" };
+const grid = document.getElementById("deviceGrid");
+DEVICES.forEach(d => {
+  const el = document.createElement("article");
+  el.className = "device"; el.dataset.status = d.status;
+  const art = d.shape === "fold" ? '<b style="height:72px"></b><b style="height:72px"></b>'
+            : d.shape === "small" ? '<b style="height:76px;width:40px"></b>'
+            : d.code === "mustang" ? '<b style="height:92px;width:48px"></b>' : '<b style="height:86px"></b>';
+  el.innerHTML = '<div class="phone" aria-hidden="true">' + art + '</div>' +
+    '<span class="status ' + d.status + '">' + LABEL[d.status] + '</span>' +
+    '<div><h3>' + d.name + '</h3><div class="code">' + d.code + '</div></div>' +
+    '<div class="meta"><span>Maintainer</span><strong>' + d.maintainer + '</strong></div>' +
+    '<a class="pill ' + (d.status === "official" ? "solid" : "ghost") + '" href="' + d.link + '">' + d.action + '</a>';
+  grid.appendChild(el);
+});
+const join = document.createElement("article");
+join.className = "device join"; join.dataset.status = "wanted";
+join.innerHTML = '<span class="status wanted">YOUR DEVICE?</span><div><h3>Maintain bitDroid</h3><p class="lede" style="font-size:15px;margin-top:6px">Have a phone that runs LineageOS 24? Build bitDroid for it and become its maintainer.</p></div><a class="pill ghost" href="https://t.me/bitDroidCommunity">Talk to us</a>';
+grid.appendChild(join);
+document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+  const f = chip.dataset.f;
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
+  grid.querySelectorAll(".device").forEach(el => {
+    el.style.display = (f === "all" || el.dataset.status === f || (f === "progress" && el.dataset.status === "wanted")) ? "" : "none";
+  });
+}));
+if (!reduce) grid.querySelectorAll(".device").forEach(el => {
+  el.addEventListener("pointermove", e => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--ry", ((e.clientX - r.left) / r.width - .5) * 10 + "deg");
+    el.style.setProperty("--rx", -((e.clientY - r.top) / r.height - .5) * 10 + "deg");
+  });
+  el.addEventListener("pointerleave", () => { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); });
+});
+
+/* ---------- feature tiles: light follows the pointer ---------- */
+document.querySelectorAll(".tile").forEach(t => t.addEventListener("pointermove", e => {
+  const r = t.getBoundingClientRect();
+  t.style.setProperty("--mx", (e.clientX - r.left) + "px");
+  t.style.setProperty("--my", (e.clientY - r.top) + "px");
+}));
+
+/* ---------- hero switch ---------- */
+const flip = document.getElementById("flip"), knob = document.getElementById("knob");
+flip.addEventListener("click", () => {
+  const on = document.body.classList.toggle("off") === false;
+  flip.setAttribute("aria-pressed", String(on));
+  knob.textContent = on ? "ON" : "OFF";
+});
+
+/* ---------- copy ---------- */
+document.getElementById("copyBtn").addEventListener("click", async e => {
+  const btn = e.currentTarget;
+  try { await navigator.clipboard.writeText(document.getElementById("buildCmds").innerText.replace(/^#.*\n/, "")); btn.textContent = "Copied"; }
+  catch (err) { btn.textContent = "Select the text to copy"; }
+  setTimeout(() => { btn.textContent = "Copy commands"; }, 1800);
+});
+
+/* ---------- scroll: Glow drift, progress, hero parallax, sticky phone tilt ---------- */
+const root = document.documentElement, hero = document.querySelector(".hero"), enh = document.getElementById("enhancements");
+const SKY = [["#5B3FC8", "#0F5C63", "#5A2346"], ["#0F5C63", "#5B3FC8", "#3D2F8F"], ["#5A2346", "#0F5C63", "#5B3FC8"], ["#3D2F8F", "#5A2346", "#0F5C63"]];
+const blobs = document.querySelectorAll(".sky i");
+let lastStage = -1, ticking = false;
+function onScroll() {
+  ticking = false;
+  const max = root.scrollHeight - innerHeight;
+  const p = max > 0 ? scrollY / max : 0;
+  if (!reduce) {
+    root.style.setProperty("--p", p.toFixed(4));
+    hero.style.setProperty("--hp", Math.min(1, scrollY / innerHeight).toFixed(3));
+    const r = enh.getBoundingClientRect();
+    enh.style.setProperty("--ep", Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - innerHeight))).toFixed(3));
+  }
+  const stage = Math.min(SKY.length - 1, Math.floor(p * SKY.length));
+  if (stage !== lastStage) { lastStage = stage; blobs.forEach((b, i) => b.style.background = SKY[stage][i]); }
+}
+addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+onScroll();
+
+/* Enhancements: the item in the middle of the screen flips its switch on */
+const items = document.querySelectorAll(".enh-item");
+items[0].classList.add("active");
+if ("IntersectionObserver" in window) {
+  const io2 = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { items.forEach(x => x.classList.remove("active")); e.target.classList.add("active"); }
+  }), { rootMargin: "-45% 0px -45% 0px" });
+  items.forEach(x => io2.observe(x));
+}
+
+/* Reveal on scroll: only things that start below the first screen, so the page is complete at rest */
+if (!reduce && "IntersectionObserver" in window) {
+  const els = document.querySelectorAll(".head, .device, .tile, .steps li, .tg, .split > div, .outro h2, .warn");
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.remove("pre"); io.unobserve(e.target); }
+  }), { rootMargin: "0px 0px -8% 0px" });
+  els.forEach((el, i) => {
+    if (el.getBoundingClientRect().top > innerHeight) {
+      el.classList.add("rv", "pre");
+      el.style.transitionDelay = ((i % 4) * 70) + "ms";
+      io.observe(el);
+    }
+  });
+}
+</script>
+</body>
+</html>
